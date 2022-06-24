@@ -6,29 +6,20 @@ const {
   updateColor,
 } = require('../controllers/budgetController');
 
+const socketioJwt = require('socketio-jwt');
+
 module.exports = (io) => {
-  io.sockets.on('connection', (socket) => {
-    console.log('new connection');
-    socket.on('fetchBudgets', () => {
-      fetchBudgets(io);
-    });
+  io.use(
+    socketioJwt.authorize({
+      secret: process.env.JWT_SECRET,
+      timeout: 15000,
+      handshake: true,
+    })
+  );
 
-    socket.on('createBudget', (budget) => {
-      createBudget(io, budget);
+  io.on('connection', (socket) => {
+    socket.on('hello', () => {
+      console.log('hello there', socket.decoded_token.id);
     });
-
-    socket.on('updateBudget', (budget) => {
-      updateBudget(io, budget);
-    });
-
-    socket.on('deleteBudget', (id) => {
-      deleteBudget(io, id);
-    });
-
-    socket.on('color', (color) => {
-      updateColor(io, color);
-    });
-
-    socket.on('disconnect', () => console.log('disconnected'));
   });
 };
