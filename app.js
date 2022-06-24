@@ -10,6 +10,7 @@ const { Server } = require('socket.io');
 const io = new Server(server);
 require('./socket')(io);
 
+const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const connectDB = require('./configs/db');
 connectDB();
 
@@ -19,6 +20,9 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/user', userRoute);
+
+app.use(notFound);
+app.use(errorHandler);
 
 server.listen(8000, () => {
   console.log('listening on *:8000');

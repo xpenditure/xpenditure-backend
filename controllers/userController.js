@@ -51,7 +51,11 @@ const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).select('-password');
 
   if (user) {
-    res.status(200).json(user);
+    res.status(200).json({
+      status: 'success',
+      payload: user,
+      message: 'retrieved user data',
+    });
   } else {
     res.status(400);
     throw new Error('User not found');
