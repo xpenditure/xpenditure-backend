@@ -20,10 +20,6 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    budgets: {
-      type: mongoose.Types.ObjectId,
-      ref: 'Budget',
-    },
   },
   {
     timestamps: true,

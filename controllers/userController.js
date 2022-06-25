@@ -51,18 +51,20 @@ const loginUser = asyncHandler(async (req, res) => {
 
 // Get user profile
 const getUserProfile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).select('-password');
+  User.findById(req.user._id)
+    .select('-password')
+    .exec((err, user) => {
+      if (err) {
+        res.status(400);
+        throw new Error('User not found');
+      }
 
-  if (user) {
-    res.status(200).json({
-      status: 'successdul',
-      payload: user,
-      message: 'retrieved user data successfully',
+      res.status(200).json({
+        status: 'successful',
+        payload: user,
+        message: 'retrieved user data successfully',
+      });
     });
-  } else {
-    res.status(400);
-    throw new Error('User not found');
-  }
 });
 
 // Update user profile

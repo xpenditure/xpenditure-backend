@@ -6,9 +6,15 @@ const fetchBudgets = (io, socket) => {
     .sort({
       createdAt: -1,
     })
-    .exec()
-    .then((budgets) => io.sockets.emit('fetchBudgets', budgets))
-    .catch((error) => console.log(error));
+    .populate({ path: 'user', select: 'firstName' })
+    .exec((err, budgets) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      io.sockets.emit('fetchBudgets', budgets);
+    });
 };
 
 const createBudget = async (io, socket, budget) => {
@@ -74,10 +80,24 @@ const updateBudgeteColor = (io, socket, color) => {
   });
 };
 
+const fetchBudgetsByLabel = (io, _, labelId) => {
+  Budget.find({ label: labelId })
+    .sort({ createdAt: -1 })
+    .exec((err, budgets) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      io.sockets.emit('fetchBudgetByLabel', budgets);
+    });
+};
+
 module.exports = {
   createBudget,
   fetchBudgets,
   updateBudget,
   deleteBudget,
   updateBudgeteColor,
+  fetchBudgetsByLabel,
 };
