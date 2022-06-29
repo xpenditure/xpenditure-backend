@@ -7,6 +7,7 @@ const {
 } = require('../controllers/budgetController');
 
 const socketioJwt = require('socketio-jwt');
+const { fetchLabels, createLabel } = require('../controllers/labelController');
 
 module.exports = (io) => {
   io.use(
@@ -40,6 +41,15 @@ module.exports = (io) => {
 
     socket.on('budgetColor', (color) => {
       updateBudgeteColor(io, socket, color);
+    });
+
+    // Labels socket connections
+    socket.on('fetchLabels', () => {
+      fetchLabels(io, socket);
+    });
+
+    socket.on('createLabel', (label) => {
+      createLabel(io, socket, label);
     });
   });
 };

@@ -5,10 +5,11 @@ const labelSchema = mongoose.Schema(
     name: {
       type: String,
       required: true,
+      unique: true,
     },
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
-  { timestamps }
+  { timestamps: true }
 );
 
 const Label = mongoose.model('Label', labelSchema);
