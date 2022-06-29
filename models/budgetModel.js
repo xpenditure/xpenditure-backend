@@ -2,10 +2,28 @@ const mongoose = require('mongoose');
 
 const budgetSchema = mongoose.Schema(
   {
-    name: String,
-    total: Number,
-    summary: String,
-    color: String,
+    name: {
+      type: String,
+      required: true,
+    },
+    total: {
+      type: Number,
+      required: true,
+    },
+    summary: {
+      type: String,
+    },
+    color: {
+      type: String,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    label: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Label',
+    },
   },
   { timestamps: true }
 );

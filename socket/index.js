@@ -3,32 +3,53 @@ const {
   fetchBudgets,
   deleteBudget,
   updateBudget,
-  updateColor,
+  updateBudgeteColor,
 } = require('../controllers/budgetController');
 
+const socketioJwt = require('socketio-jwt');
+const { fetchLabels, createLabel } = require('../controllers/labelController');
+
 module.exports = (io) => {
-  io.sockets.on('connection', (socket) => {
-    console.log('new connection');
+  io.use(
+    socketioJwt.authorize({
+      secret: process.env.JWT_SECRET,
+      timeout: 15000,
+      handshake: true,
+    })
+  );
+
+  io.on('connection', (socket) => {
+    socket.on('hello', () => {
+      console.log('hello there', socket.decoded_token.id);
+    });
+
     socket.on('fetchBudgets', () => {
-      fetchBudgets(io);
+      fetchBudgets(io, socket);
     });
 
     socket.on('createBudget', (budget) => {
-      createBudget(io, budget);
+      createBudget(io, socket, budget);
     });
 
     socket.on('updateBudget', (budget) => {
-      updateBudget(io, budget);
+      updateBudget(io, socket, budget);
     });
 
     socket.on('deleteBudget', (id) => {
-      deleteBudget(io, id);
+      deleteBudget(io, socket, id);
     });
 
-    socket.on('color', (color) => {
-      updateColor(io, color);
+    socket.on('budgetColor', (color) => {
+      updateBudgeteColor(io, socket, color);
     });
 
-    socket.on('disconnect', () => console.log('disconnected'));
+    // Labels socket connections
+    socket.on('fetchLabels', () => {
+      fetchLabels(io, socket);
+    });
+
+    socket.on('createLabel', (label) => {
+      createLabel(io, socket, label);
+    });
   });
 };
