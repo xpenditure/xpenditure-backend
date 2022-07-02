@@ -14,7 +14,7 @@ const labelSchema = mongoose.Schema(
 );
 
 labelSchema.pre('save', async function () {
-  this.alias = this.name.split(' ').join('-');
+  this.alias = this.name.toLowerCase().split(' ').join('-');
 });
 
 const Label = mongoose.model('Label', labelSchema);

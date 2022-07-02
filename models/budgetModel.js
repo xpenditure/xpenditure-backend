@@ -21,8 +21,7 @@ const budgetSchema = mongoose.Schema(
       ref: 'User',
     },
     label: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Label',
+      type: String,
     },
   },
   { timestamps: true }
