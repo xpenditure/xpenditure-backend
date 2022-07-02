@@ -19,7 +19,7 @@ const fetchBudgets = (io, socket) => {
 
 const createBudget = async (io, socket, budget) => {
   const { id } = socket.decoded_token;
-  const { budgetName, budgetTotal, budgetSummary, budgetColor } = budget;
+  const { budgetName, budgetTotal, budgetSummary, budgetColor, label } = budget;
 
   const newBudget = new Budget({
     name: budgetName,
@@ -27,6 +27,7 @@ const createBudget = async (io, socket, budget) => {
     summary: budgetSummary,
     color: budgetColor,
     user: id,
+    label,
   });
 
   newBudget.save((err, _) => {

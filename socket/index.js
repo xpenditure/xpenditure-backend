@@ -8,6 +8,10 @@ const {
 
 const socketioJwt = require('socketio-jwt');
 const { fetchLabels, createLabel } = require('../controllers/labelController');
+const {
+  setUserColor,
+  setUserBackground,
+} = require('../controllers/userController');
 
 module.exports = (io) => {
   io.use(
@@ -23,6 +27,7 @@ module.exports = (io) => {
       console.log('hello there', socket.decoded_token.id);
     });
 
+    // budgets socket connections
     socket.on('fetchBudgets', () => {
       fetchBudgets(io, socket);
     });
@@ -50,6 +55,15 @@ module.exports = (io) => {
 
     socket.on('createLabel', (label) => {
       createLabel(io, socket, label);
+    });
+
+    // User socket connections
+    socket.on('userColor', (color) => {
+      setUserColor(io, socket, color);
+    });
+
+    socket.on('userBackground', (color) => {
+      setUserBackground(io, socket, color);
     });
   });
 };
