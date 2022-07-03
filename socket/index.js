@@ -4,6 +4,7 @@ const {
   deleteBudget,
   updateBudget,
   updateBudgeteColor,
+  fetchBudgetsByLabel,
 } = require('../controllers/budgetController');
 
 const socketioJwt = require('socketio-jwt');
@@ -46,6 +47,10 @@ module.exports = (io) => {
 
     socket.on('budgetColor', (color) => {
       updateBudgeteColor(io, socket, color);
+    });
+
+    socket.on('fetchBudgetsByLabel', (labelAlias) => {
+      fetchBudgetsByLabel(io, socket, labelAlias);
     });
 
     // Labels socket connections

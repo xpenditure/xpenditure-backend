@@ -81,8 +81,9 @@ const updateBudgeteColor = (io, socket, color) => {
   });
 };
 
-const fetchBudgetsByLabel = (io, _, labelId) => {
-  Budget.find({ label: labelId })
+const fetchBudgetsByLabel = (io, socket, labelAlias) => {
+  const user = socket.decoded_token.id;
+  Budget.find({ label: labelAlias, user })
     .sort({ createdAt: -1 })
     .exec((err, budgets) => {
       if (err) {
@@ -90,7 +91,7 @@ const fetchBudgetsByLabel = (io, _, labelId) => {
         return;
       }
 
-      io.sockets.emit('fetchBudgetByLabel', budgets);
+      io.sockets.emit('fetchBudgetsByLabel', budgets);
     });
 };
 
