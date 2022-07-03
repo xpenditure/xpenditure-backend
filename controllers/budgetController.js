@@ -6,7 +6,7 @@ const fetchBudgets = (io, socket) => {
     .sort({
       createdAt: -1,
     })
-    .populate({ path: 'user', select: 'email' })
+    .populate({ path: 'labels', select: 'name' })
     .exec((err, budgets) => {
       if (err) {
         console.log(err);
