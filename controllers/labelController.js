@@ -32,7 +32,20 @@ const createLabel = (io, socket, label) => {
   });
 };
 
+const updateLabel = (io, socket, label) => {
+  const { id, name } = label;
+  Label.findByIdAndUpdate(id, { name }, (err, _) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    fetchLabels(io, socket);
+  });
+};
+
 module.exports = {
   fetchLabels,
   createLabel,
+  updateLabel,
 };

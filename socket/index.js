@@ -8,7 +8,11 @@ const {
 } = require('../controllers/budgetController');
 
 const socketioJwt = require('socketio-jwt');
-const { fetchLabels, createLabel } = require('../controllers/labelController');
+const {
+  fetchLabels,
+  createLabel,
+  updateLabel,
+} = require('../controllers/labelController');
 const {
   setUserColor,
   setUserBackground,
@@ -60,6 +64,10 @@ module.exports = (io) => {
 
     socket.on('createLabel', (label) => {
       createLabel(io, socket, label);
+    });
+
+    socket.on('updateLabel', (label) => {
+      updateLabel(io, socket, label);
     });
 
     // User socket connections

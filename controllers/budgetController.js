@@ -45,15 +45,17 @@ const createBudget = async (io, socket, budget) => {
 };
 
 const updateBudget = (io, socket, budget) => {
-  const { id, budgetName, budgetTotal, budgetSummary } = budget;
+  const { budgetId, budgetName, budgetTotal, budgetSummary, budgetLabels } =
+    budget;
 
   const updatedBudget = {
     name: budgetName,
     total: budgetTotal,
     summary: budgetSummary,
+    labels: budgetLabels,
   };
 
-  Budget.findByIdAndUpdate(id, updatedBudget, (err, _) => {
+  Budget.findByIdAndUpdate(budgetId, updatedBudget, (err, _) => {
     if (err) {
       console.log(err);
       return;
