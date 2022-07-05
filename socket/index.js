@@ -12,6 +12,7 @@ const {
   fetchLabels,
   createLabel,
   updateLabel,
+  deleteLabel,
 } = require('../controllers/labelController');
 const {
   setUserColor,
@@ -68,6 +69,10 @@ module.exports = (io) => {
 
     socket.on('updateLabel', (label) => {
       updateLabel(io, socket, label);
+    });
+
+    socket.on('deleteLabel', (id) => {
+      deleteLabel(io, socket, id);
     });
 
     // User socket connections

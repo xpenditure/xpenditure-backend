@@ -1,4 +1,7 @@
 const Label = require('../models/labelModel');
+const Budget = require('../models/budgetModel');
+
+const { fetchBudgets } = require('./budgetController');
 
 const fetchLabels = (io, socket) => {
   const userId = socket.decoded_token.id;
@@ -44,8 +47,28 @@ const updateLabel = (io, socket, label) => {
   });
 };
 
+const deleteLabel = (io, socket, id) => {
+  Label.findByIdAndDelete(id, (err, _) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    fetchLabels(io, socket);
+  });
+
+  Budget.updateMany(
+    { labels: id },
+    {
+      $pullAll: {
+        labels: id,
+      },
+    }
+  );
+};
+
 module.exports = {
   fetchLabels,
   createLabel,
   updateLabel,
+  deleteLabel,
 };
