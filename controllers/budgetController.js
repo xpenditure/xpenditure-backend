@@ -74,21 +74,11 @@ const deleteBudget = (io, socket, id) => {
   });
 };
 
-const updateBudgeteColor = (io, socket, color) => {
-  Budget.findByIdAndUpdate(color.id, { color: color.color }, (err, _) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-
-    fetchBudgets(io, socket);
-  });
-};
-
-const fetchBudgetsByLabel = (io, socket, labelAlias) => {
+const fetchBudgetsByLabel = (io, socket, labelId) => {
   const user = socket.decoded_token.id;
-  Budget.find({ label: labelAlias, user })
+  Budget.find({ labels: labelId, user })
     .sort({ createdAt: -1 })
+    .populate({ path: 'labels', select: 'name' })
     .exec((err, budgets) => {
       if (err) {
         console.log(err);
@@ -99,11 +89,23 @@ const fetchBudgetsByLabel = (io, socket, labelAlias) => {
     });
 };
 
+const updateBudgetLabel = (io, socket, data) => {
+  const { budgetId, labels } = data;
+  Budget.findByIdAndUpdate(budgetId, { labels }, (err, _) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    fetchBudgets(io, socket);
+  });
+};
+
 module.exports = {
   createBudget,
   fetchBudgets,
   updateBudget,
   deleteBudget,
-  updateBudgeteColor,
   fetchBudgetsByLabel,
+  updateBudgetLabel,
 };

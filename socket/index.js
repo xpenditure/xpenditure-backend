@@ -3,8 +3,8 @@ const {
   fetchBudgets,
   deleteBudget,
   updateBudget,
-  updateBudgeteColor,
   fetchBudgetsByLabel,
+  updateBudgetLabel,
 } = require('../controllers/budgetController');
 
 const socketioJwt = require('socketio-jwt');
@@ -45,12 +45,12 @@ module.exports = (io) => {
       deleteBudget(io, socket, id);
     });
 
-    socket.on('budgetColor', (color) => {
-      updateBudgeteColor(io, socket, color);
+    socket.on('fetchBudgetsByLabel', (labelId) => {
+      fetchBudgetsByLabel(io, socket, labelId);
     });
 
-    socket.on('fetchBudgetsByLabel', (labelAlias) => {
-      fetchBudgetsByLabel(io, socket, labelAlias);
+    socket.on('updateBudgetLabel', (data) => {
+      updateBudgetLabel(io, socket, data);
     });
 
     // Labels socket connections
