@@ -18,6 +18,10 @@ const {
   setUserColor,
   setUserBackground,
 } = require('../controllers/userController');
+const {
+  fetchExpenses,
+  createExpenses,
+} = require('../controllers/expensesController');
 
 module.exports = (io) => {
   io.use(
@@ -82,6 +86,15 @@ module.exports = (io) => {
 
     socket.on('userBackground', (color) => {
       setUserBackground(io, socket, color);
+    });
+
+    // Expenses socket connections
+    socket.on('fetchExpenses', () => {
+      fetchExpenses(io, socket);
+    });
+
+    socket.on('createExpenses', (expenses) => {
+      createExpenses(io, socket, expenses);
     });
   });
 };

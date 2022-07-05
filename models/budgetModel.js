@@ -13,9 +13,6 @@ const budgetSchema = mongoose.Schema(
     summary: {
       type: String,
     },
-    color: {
-      type: String,
-    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

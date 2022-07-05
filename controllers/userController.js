@@ -91,6 +91,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+// We check user profile with socket after
+// theme switch. We use the (_) to different
+// from the regular ajax request
 const _fetchUserProfile = (io, socket) => {
   const userId = socket.decoded_token.id;
   User.findById(userId)

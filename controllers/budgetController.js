@@ -45,6 +45,7 @@ const createBudget = async (io, socket, budget) => {
 };
 
 const updateBudget = (io, socket, budget) => {
+  const userId = socket.decoded_token.id;
   const { budgetId, budgetName, budgetTotal, budgetSummary, budgetLabels } =
     budget;
 
@@ -55,18 +56,23 @@ const updateBudget = (io, socket, budget) => {
     labels: budgetLabels,
   };
 
-  Budget.findByIdAndUpdate(budgetId, updatedBudget, (err, _) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
+  Budget.findOneAndUpdate(
+    { _id: budgetId, user: userId },
+    updatedBudget,
+    (err, _) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
 
-    fetchBudgets(io, socket);
-  });
+      fetchBudgets(io, socket);
+    }
+  );
 };
 
 const deleteBudget = (io, socket, id) => {
-  Budget.findByIdAndDelete(id, (err, _) => {
+  const userId = socket.decoded_token.id;
+  Budget.findOneAndDelete({ _id: id, user: userId }, (err, _) => {
     if (err) {
       console.log(err);
       return;
@@ -77,8 +83,8 @@ const deleteBudget = (io, socket, id) => {
 };
 
 const fetchBudgetsByLabel = (io, socket, labelId) => {
-  const user = socket.decoded_token.id;
-  Budget.find({ labels: labelId, user })
+  const userId = socket.decoded_token.id;
+  Budget.find({ labels: labelId, user: userId })
     .sort({ createdAt: -1 })
     .populate({ path: 'labels', select: 'name' })
     .exec((err, budgets) => {
@@ -92,15 +98,20 @@ const fetchBudgetsByLabel = (io, socket, labelId) => {
 };
 
 const updateBudgetLabel = (io, socket, data) => {
+  const userId = socket.decoded_token.id;
   const { budgetId, labels } = data;
-  Budget.findByIdAndUpdate(budgetId, { labels }, (err, _) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
+  Budget.findOneAndUpdate(
+    { _id: budgetId, user: userId },
+    { labels },
+    (err, _) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
 
-    fetchBudgets(io, socket);
-  });
+      fetchBudgets(io, socket);
+    }
+  );
 };
 
 module.exports = {

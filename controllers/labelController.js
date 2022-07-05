@@ -1,8 +1,6 @@
 const Label = require('../models/labelModel');
 const Budget = require('../models/budgetModel');
 
-const { fetchBudgets } = require('./budgetController');
-
 const fetchLabels = (io, socket) => {
   const userId = socket.decoded_token.id;
   Label.find({ user: userId })
@@ -36,8 +34,9 @@ const createLabel = (io, socket, label) => {
 };
 
 const updateLabel = (io, socket, label) => {
+  const userId = socket.decoded_token.id;
   const { id, name } = label;
-  Label.findByIdAndUpdate(id, { name }, (err, _) => {
+  Label.findOneAndUpdate({ _id: id, user: userId }, { name }, (err, _) => {
     if (err) {
       console.log(err);
       return;
@@ -48,7 +47,8 @@ const updateLabel = (io, socket, label) => {
 };
 
 const deleteLabel = (io, socket, id) => {
-  Label.findByIdAndDelete(id, (err, _) => {
+  const userId = socket.decoded_token.id;
+  Label.findOneAndDelete({ _id: id, user: userId }, (err, _) => {
     if (err) {
       console.log(err);
       return;
