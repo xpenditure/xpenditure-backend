@@ -22,6 +22,7 @@ const {
   fetchExpenses,
   createExpenses,
 } = require('../controllers/expensesController');
+const { fetchFunds, createFund } = require('../controllers/fundController');
 
 module.exports = (io) => {
   io.use(
@@ -95,6 +96,15 @@ module.exports = (io) => {
 
     socket.on('createExpenses', (expenses) => {
       createExpenses(io, socket, expenses);
+    });
+
+    // Funds socket connections
+    socket.on('fetchFunds', (budgetId) => {
+      fetchFunds(io, socket, budgetId);
+    });
+
+    socket.on('createFund', (fund) => {
+      createFund(io, socket, fund);
     });
   });
 };

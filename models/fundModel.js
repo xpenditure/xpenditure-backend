@@ -8,6 +8,7 @@ const fundSchema = mongoose.Schema(
     },
     narration: {
       type: String,
+      default: 'Fund added',
     },
     budget: {
       type: mongoose.Schema.Types.ObjectId,
