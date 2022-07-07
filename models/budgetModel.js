@@ -13,12 +13,13 @@ const budgetSchema = mongoose.Schema(
     summary: {
       type: String,
     },
-    funds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Fund' }],
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    funds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Fund' }],
     labels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Label' }],
+    expenses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Expenses' }],
   },
   { timestamps: true }
 );

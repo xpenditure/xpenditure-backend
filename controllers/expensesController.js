@@ -1,4 +1,6 @@
 const Expenses = require('../models/expensesModel');
+const Budget = require('../models/budgetModel');
+const { fetchBudgets } = require('./budgetController');
 
 const fetchExpenses = (io, socket, id) => {
   const userId = socket.decoded_token.id;
@@ -12,7 +14,7 @@ const fetchExpenses = (io, socket, id) => {
   });
 };
 
-const createExpenses = (io, socket, expenses) => {
+const createExpenses = async (io, socket, expenses) => {
   const userId = socket.decoded_token.id;
   const { name, total, budgetId } = expenses;
 
@@ -23,13 +25,24 @@ const createExpenses = (io, socket, expenses) => {
     user: userId,
   });
 
-  newExpenses.save((err, _) => {
+  newExpenses.save(async (err, _) => {
     if (err) {
       console.log(err);
       return;
     }
 
     fetchExpenses(io, socket);
+
+    let relatedBudget = await Budget.find(budgetId);
+    relatedBudget.expenses.push(newExpenses);
+    await relatedBudget.save((err, _) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      fetchBudgets(io, socket);
+    });
   });
 };
 
