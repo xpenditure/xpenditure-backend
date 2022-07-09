@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 const generateToken = require('../utils/generateToken');
+const { ioMessage } = require('../utils/ioMessage');
 
 // User register
 const registerUser = asyncHandler(async (req, res) => {
@@ -25,7 +26,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if (user) {
     res.status(201).json({
       status: 'successful',
-      payload: generateToken(user._id),
+      token: generateToken(user._id),
       message: 'user registered successfully',
     });
   } else {
@@ -41,7 +42,9 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (user && (await user.matchPassword(password))) {
     res.status(200).json({
+      status: 'successful',
       token: generateToken(user._id),
+      message: 'user registered successfully',
     });
   } else {
     res.status(401);
@@ -78,10 +81,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     user.email = email || user.email;
 
     const updatedUser = await user.save();
-    res.status(204).json({
+    res.status(200).json({
       status: 'successful',
       payload: updatedUser,
-      message: 'user updated successfully',
+      message: 'Profile updated successfully',
     });
   } else {
     res.json(400);
@@ -89,9 +92,87 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+// We check user profile with socket after
+// theme switch. We use the (_) to different
+// from the regular ajax request
+const _fetchUserProfile = (io, socket) => {
+  const userId = socket.decoded_token.id;
+  User.findById(userId)
+    .select('-password')
+    .exec((err, user) => {
+      if (err) {
+        res.status(400);
+        throw new Error('User not found');
+      }
+
+      io.sockets.emit('fetchUserProfile', user);
+    });
+};
+
+const setUserColor = async (io, socket, color) => {
+  const userId = socket.decoded_token.id;
+  const user = await User.findById(userId);
+
+  const newColor = {
+    color: color || user.color,
+  };
+
+  User.findByIdAndUpdate(userId, newColor, (err, _) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    _fetchUserProfile(io, socket);
+  });
+};
+
+const setUserBackground = async (io, socket, color) => {
+  const userId = socket.decoded_token.id;
+  const user = await User.findById(userId);
+
+  const newColor = {
+    background: color || user.background,
+  };
+
+  User.findByIdAndUpdate(userId, newColor, (err, _) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    _fetchUserProfile(io, socket);
+  });
+};
+
+const uploadAvatar = async (io, socket, url) => {
+  const userId = socket.decoded_token.id;
+  const user = await User.findById(userId);
+
+  const newAvatar = {
+    avatar: url || user.avatar,
+  };
+
+  User.findByIdAndUpdate(user, newAvatar, (err, _) => {
+    if (err) {
+      consoe.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
+
+      return;
+    }
+
+    ioMessage(socket, 'Profile image uploaded', 'ok');
+
+    _fetchUserProfile(io, socket);
+  });
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   updateUserProfile,
+  setUserColor,
+  setUserBackground,
+  uploadAvatar,
 };

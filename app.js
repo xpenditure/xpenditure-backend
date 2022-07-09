@@ -20,6 +20,10 @@ app.use(express.json());
 
 app.use('/api/user', userRoute);
 
+app.get('/api/test', (req, res) => {
+  res.send('hello');
+});
+
 app.use(notFound);
 app.use(errorHandler);
 

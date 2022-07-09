@@ -3,11 +3,27 @@ const {
   fetchBudgets,
   deleteBudget,
   updateBudget,
-  updateBudgeteColor,
+  fetchBudgetsByLabel,
+  updateBudgetLabel,
 } = require('../controllers/budgetController');
 
 const socketioJwt = require('socketio-jwt');
-const { fetchLabels, createLabel } = require('../controllers/labelController');
+const {
+  fetchLabels,
+  createLabel,
+  updateLabel,
+  deleteLabel,
+} = require('../controllers/labelController');
+const {
+  setUserColor,
+  setUserBackground,
+  uploadAvatar,
+} = require('../controllers/userController');
+const {
+  fetchExpenses,
+  createExpenses,
+} = require('../controllers/expensesController');
+const { fetchFunds, createFund } = require('../controllers/fundController');
 
 module.exports = (io) => {
   io.use(
@@ -23,6 +39,7 @@ module.exports = (io) => {
       console.log('hello there', socket.decoded_token.id);
     });
 
+    // budgets socket connections
     socket.on('fetchBudgets', () => {
       fetchBudgets(io, socket);
     });
@@ -39,8 +56,12 @@ module.exports = (io) => {
       deleteBudget(io, socket, id);
     });
 
-    socket.on('budgetColor', (color) => {
-      updateBudgeteColor(io, socket, color);
+    socket.on('fetchBudgetsByLabel', (labelId) => {
+      fetchBudgetsByLabel(io, socket, labelId);
+    });
+
+    socket.on('updateBudgetLabel', (data) => {
+      updateBudgetLabel(io, socket, data);
     });
 
     // Labels socket connections
@@ -50,6 +71,45 @@ module.exports = (io) => {
 
     socket.on('createLabel', (label) => {
       createLabel(io, socket, label);
+    });
+
+    socket.on('updateLabel', (label) => {
+      updateLabel(io, socket, label);
+    });
+
+    socket.on('deleteLabel', (id) => {
+      deleteLabel(io, socket, id);
+    });
+
+    // User socket connections
+    socket.on('userColor', (color) => {
+      setUserColor(io, socket, color);
+    });
+
+    socket.on('userBackground', (color) => {
+      setUserBackground(io, socket, color);
+    });
+
+    socket.on('uploadAvatar', (url) => {
+      uploadAvatar(io, socket, url);
+    });
+
+    // Expenses socket connections
+    socket.on('fetchExpenses', () => {
+      fetchExpenses(io, socket);
+    });
+
+    socket.on('createExpenses', (expenses) => {
+      createExpenses(io, socket, expenses);
+    });
+
+    // Funds socket connections
+    socket.on('fetchFunds', (budgetId) => {
+      fetchFunds(io, socket, budgetId);
+    });
+
+    socket.on('createFund', (fund) => {
+      createFund(io, socket, fund);
     });
   });
 };

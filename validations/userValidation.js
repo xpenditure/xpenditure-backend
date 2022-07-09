@@ -42,7 +42,7 @@ const updateUserValidationRules = () => {
   return [
     check('firstName').not().isEmpty(),
     check('lastName').not().isEmpty(),
-    check('email').normalizeEmail().isEmail(),
+    check('email').normalizeEmail().isEmail().withMessage('email is invalid'),
   ];
 };
 
@@ -56,6 +56,7 @@ const validate = (req, res, next) => {
 
   return res.status(422).json({
     errors: extractedErrors,
+    message: 'Invalid input',
   });
 };
 

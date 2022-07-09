@@ -1,4 +1,7 @@
 const Budget = require('../models/budgetModel');
+const Expenses = require('../models/expensesModel');
+const Fund = require('../models/fundModel');
+const { ioMessage } = require('../utils/ioMessage');
 
 const fetchBudgets = (io, socket) => {
   const { id } = socket.decoded_token;
@@ -6,7 +9,7 @@ const fetchBudgets = (io, socket) => {
     .sort({
       createdAt: -1,
     })
-    .populate({ path: 'user', select: 'email' })
+    .populate('labels funds expenses')
     .exec((err, budgets) => {
       if (err) {
         console.log(err);
@@ -19,7 +22,8 @@ const fetchBudgets = (io, socket) => {
 
 const createBudget = async (io, socket, budget) => {
   const { id } = socket.decoded_token;
-  const { budgetName, budgetTotal, budgetSummary, budgetColor } = budget;
+  const { budgetName, budgetTotal, budgetSummary, budgetColor, budgetLabels } =
+    budget;
 
   const newBudget = new Budget({
     name: budgetName,
@@ -29,68 +33,100 @@ const createBudget = async (io, socket, budget) => {
     user: id,
   });
 
+  if (budgetLabels.length > 0) {
+    newBudget.labels.push(...budgetLabels);
+  }
+
   newBudget.save((err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
 
+    ioMessage(socket, 'Budget created', 'ok');
     fetchBudgets(io, socket);
   });
 };
 
 const updateBudget = (io, socket, budget) => {
-  const { id, budgetName, budgetTotal, budgetSummary } = budget;
+  const userId = socket.decoded_token.id;
+  const { budgetId, budgetName, budgetSummary, budgetLabels } = budget;
 
   const updatedBudget = {
     name: budgetName,
-    total: budgetTotal,
     summary: budgetSummary,
+    labels: budgetLabels,
   };
 
-  Budget.findByIdAndUpdate(id, updatedBudget, (err, _) => {
+  Budget.findOneAndUpdate(
+    { _id: budgetId, user: userId },
+    updatedBudget,
+    (err, _) => {
+      if (err) {
+        console.log(err);
+        ioMessage(socket, 'Error occured', 'failed');
+        return;
+      }
+
+      ioMessage(socket, 'Budget updated', 'ok');
+      fetchBudgets(io, socket);
+    }
+  );
+};
+
+const deleteBudget = async (io, socket, id) => {
+  const userId = socket.decoded_token.id;
+  Budget.findOneAndDelete({ _id: id, user: userId }, async (err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
+
+    // we delete the associating expenses, and
+    // funds after deleting the budget itself.
+    await Expenses.deleteMany({ budget: id });
+    await Fund.deleteMany({ budget: id });
+
+    ioMessage(socket, 'Budget deleted', 'ok');
 
     fetchBudgets(io, socket);
   });
 };
 
-const deleteBudget = (io, socket, id) => {
-  Budget.findByIdAndDelete(id, (err, _) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-
-    fetchBudgets(io, socket);
-  });
-};
-
-const updateBudgeteColor = (io, socket, color) => {
-  Budget.findByIdAndUpdate(color.id, { color: color.color }, (err, _) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-
-    fetchBudgets(io, socket);
-  });
-};
-
-const fetchBudgetsByLabel = (io, _, labelId) => {
-  Budget.find({ label: labelId })
+const fetchBudgetsByLabel = (io, socket, labelId) => {
+  const userId = socket.decoded_token.id;
+  Budget.find({ labels: labelId, user: userId })
     .sort({ createdAt: -1 })
+    .populate({ path: 'labels', select: 'name' })
     .exec((err, budgets) => {
       if (err) {
         console.log(err);
         return;
       }
 
-      io.sockets.emit('fetchBudgetByLabel', budgets);
+      io.sockets.emit('fetchBudgetsByLabel', budgets);
     });
+};
+
+const updateBudgetLabel = (io, socket, data) => {
+  const userId = socket.decoded_token.id;
+  const { budgetId, labels } = data;
+  Budget.findOneAndUpdate(
+    { _id: budgetId, user: userId },
+    { labels },
+    (err, _) => {
+      if (err) {
+        console.log(err);
+        ioMessage(socket, 'Error occured', 'failed');
+        return;
+      }
+
+      ioMessage(socket, 'Labels changed', 'ok');
+      fetchBudgets(io, socket);
+    }
+  );
 };
 
 module.exports = {
@@ -98,6 +134,6 @@ module.exports = {
   fetchBudgets,
   updateBudget,
   deleteBudget,
-  updateBudgeteColor,
   fetchBudgetsByLabel,
+  updateBudgetLabel,
 };

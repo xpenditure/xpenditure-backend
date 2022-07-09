@@ -20,6 +20,21 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    color: {
+      type: String,
+      default: '#468737',
+    },
+    background: {
+      type: String,
+      default: 'dim',
+    },
+    layout: {
+      type: String,
+      default: 'grid',
+    },
+    avatar: {
+      type: String,
+    },
   },
   {
     timestamps: true,
