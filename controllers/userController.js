@@ -175,4 +175,5 @@ module.exports = {
   setUserColor,
   setUserBackground,
   uploadAvatar,
+  _fetchUserProfile,
 };
