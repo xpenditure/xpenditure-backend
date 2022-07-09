@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 const generateToken = require('../utils/generateToken');
+const { ioMessage } = require('../utils/ioMessage');
 
 // User register
 const registerUser = asyncHandler(async (req, res) => {
@@ -144,6 +145,28 @@ const setUserBackground = async (io, socket, color) => {
   });
 };
 
+const uploadAvatar = async (io, socket, url) => {
+  const userId = socket.decoded_token.id;
+  const user = await User.findById(userId);
+
+  const newAvatar = {
+    avatar: url || user.avatar,
+  };
+
+  User.findByIdAndUpdate(user, newAvatar, (err, _) => {
+    if (err) {
+      consoe.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
+
+      return;
+    }
+
+    ioMessage(socket, 'Profile image uploaded', 'ok');
+
+    _fetchUserProfile(io, socket);
+  });
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -151,4 +174,5 @@ module.exports = {
   updateUserProfile,
   setUserColor,
   setUserBackground,
+  uploadAvatar,
 };

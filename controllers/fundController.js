@@ -2,6 +2,7 @@ const Fund = require('../models/fundModel');
 const Budget = require('../models/budgetModel');
 
 const { fetchBudgets } = require('../controllers/budgetController');
+const { ioMessage } = require('../utils/ioMessage');
 
 const fetchFunds = (io, socket, budgetId) => {
   const userId = socket.decoded_token.id;
@@ -38,9 +39,11 @@ const createFund = async (io, socket, data) => {
     await relatedBudget.save((err, _) => {
       if (err) {
         console.log(err);
+        ioMessage(socket, 'Error occured', 'failed');
         return;
       }
 
+      ioMessage(socket, 'Fund added', 'ok');
       fetchBudgets(io, socket);
     });
   });

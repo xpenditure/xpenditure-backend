@@ -1,5 +1,6 @@
 const Label = require('../models/labelModel');
 const Budget = require('../models/budgetModel');
+const { ioMessage } = require('../utils/ioMessage');
 
 const fetchLabels = (io, socket) => {
   const userId = socket.decoded_token.id;
@@ -26,9 +27,11 @@ const createLabel = (io, socket, label) => {
   newLabel.save((err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
 
+    ioMessage(socket, 'Label created', 'ok');
     fetchLabels(io, socket);
   });
 };
@@ -39,9 +42,11 @@ const updateLabel = (io, socket, label) => {
   Label.findOneAndUpdate({ _id: id, user: userId }, { name }, (err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error coccured', 'failed');
       return;
     }
 
+    ioMessage(socket, 'Label updated', 'ok');
     fetchLabels(io, socket);
   });
 };
@@ -51,8 +56,11 @@ const deleteLabel = (io, socket, id) => {
   Label.findOneAndDelete({ _id: id, user: userId }, (err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
+
+    ioMessage(socket, 'Label deleted', 'ok');
     fetchLabels(io, socket);
   });
 

@@ -28,6 +28,13 @@ const userSchema = mongoose.Schema(
       type: String,
       default: 'dim',
     },
+    layout: {
+      type: String,
+      default: 'grid',
+    },
+    avatar: {
+      type: String,
+    },
   },
   {
     timestamps: true,

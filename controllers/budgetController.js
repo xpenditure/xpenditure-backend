@@ -1,4 +1,7 @@
 const Budget = require('../models/budgetModel');
+const Expenses = require('../models/expensesModel');
+const Fund = require('../models/fundModel');
+const { ioMessage } = require('../utils/ioMessage');
 
 const fetchBudgets = (io, socket) => {
   const { id } = socket.decoded_token;
@@ -6,7 +9,7 @@ const fetchBudgets = (io, socket) => {
     .sort({
       createdAt: -1,
     })
-    .populate('labels funds')
+    .populate('labels funds expenses')
     .exec((err, budgets) => {
       if (err) {
         console.log(err);
@@ -37,21 +40,21 @@ const createBudget = async (io, socket, budget) => {
   newBudget.save((err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
 
+    ioMessage(socket, 'Budget created', 'ok');
     fetchBudgets(io, socket);
   });
 };
 
 const updateBudget = (io, socket, budget) => {
   const userId = socket.decoded_token.id;
-  const { budgetId, budgetName, budgetTotal, budgetSummary, budgetLabels } =
-    budget;
+  const { budgetId, budgetName, budgetSummary, budgetLabels } = budget;
 
   const updatedBudget = {
     name: budgetName,
-    total: budgetTotal,
     summary: budgetSummary,
     labels: budgetLabels,
   };
@@ -62,21 +65,31 @@ const updateBudget = (io, socket, budget) => {
     (err, _) => {
       if (err) {
         console.log(err);
+        ioMessage(socket, 'Error occured', 'failed');
         return;
       }
 
+      ioMessage(socket, 'Budget updated', 'ok');
       fetchBudgets(io, socket);
     }
   );
 };
 
-const deleteBudget = (io, socket, id) => {
+const deleteBudget = async (io, socket, id) => {
   const userId = socket.decoded_token.id;
-  Budget.findOneAndDelete({ _id: id, user: userId }, (err, _) => {
+  Budget.findOneAndDelete({ _id: id, user: userId }, async (err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
+
+    // we delete the associating expenses, and
+    // funds after deleting the budget itself.
+    await Expenses.deleteMany({ budget: id });
+    await Fund.deleteMany({ budget: id });
+
+    ioMessage(socket, 'Budget deleted', 'ok');
 
     fetchBudgets(io, socket);
   });
@@ -106,9 +119,11 @@ const updateBudgetLabel = (io, socket, data) => {
     (err, _) => {
       if (err) {
         console.log(err);
+        ioMessage(socket, 'Error occured', 'failed');
         return;
       }
 
+      ioMessage(socket, 'Labels changed', 'ok');
       fetchBudgets(io, socket);
     }
   );

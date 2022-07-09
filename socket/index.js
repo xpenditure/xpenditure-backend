@@ -17,6 +17,7 @@ const {
 const {
   setUserColor,
   setUserBackground,
+  uploadAvatar,
 } = require('../controllers/userController');
 const {
   fetchExpenses,
@@ -87,6 +88,10 @@ module.exports = (io) => {
 
     socket.on('userBackground', (color) => {
       setUserBackground(io, socket, color);
+    });
+
+    socket.on('uploadAvatar', (url) => {
+      uploadAvatar(io, socket, url);
     });
 
     // Expenses socket connections

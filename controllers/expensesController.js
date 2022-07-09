@@ -1,6 +1,7 @@
 const Expenses = require('../models/expensesModel');
 const Budget = require('../models/budgetModel');
 const { fetchBudgets } = require('./budgetController');
+const { ioMessage } = require('../utils/ioMessage');
 
 const fetchExpenses = (io, socket, id) => {
   const userId = socket.decoded_token.id;
@@ -16,11 +17,12 @@ const fetchExpenses = (io, socket, id) => {
 
 const createExpenses = async (io, socket, expenses) => {
   const userId = socket.decoded_token.id;
-  const { name, total, budgetId } = expenses;
+  const { name, total, budgetId, narration } = expenses;
 
   const newExpenses = new Expenses({
     name,
     total,
+    narration,
     budget: budgetId,
     user: userId,
   });
@@ -28,12 +30,14 @@ const createExpenses = async (io, socket, expenses) => {
   newExpenses.save(async (err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
 
     fetchExpenses(io, socket);
+    ioMessage(socket, 'Expenses created', 'ok');
 
-    let relatedBudget = await Budget.find(budgetId);
+    let relatedBudget = await Budget.findById(budgetId);
     relatedBudget.expenses.push(newExpenses);
     await relatedBudget.save((err, _) => {
       if (err) {
@@ -58,9 +62,11 @@ const updateExpenses = (io, socket, expenses) => {
   Expenses.findOneAndUpdate({ id, user: userId }, updatedExpenses, (err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
 
+    ioMessage(socket, 'Expenses updated', 'ok');
     fetchExpenses(io, socket);
   });
 };
@@ -71,9 +77,11 @@ const deleteExpenses = (io, socket, id) => {
   Expenses.findOneAndDelete({ id, user: userId }, (err, _) => {
     if (err) {
       console.log(err);
+      ioMessage(socket, 'Error occured', 'failed');
       return;
     }
 
+    ioMessage(socket, 'Expenses deleted', 'ok');
     fetchExpenses(io, socket);
   });
 };

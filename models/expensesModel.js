@@ -6,6 +6,7 @@ const expensesSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    narration: { type: String },
     total: {
       type: Number,
       required: true,
