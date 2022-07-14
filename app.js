@@ -14,15 +14,13 @@ const connectDB = require('./configs/db');
 connectDB();
 
 const userRoute = require('./routes/userRoute');
+const gmailRoute = require('./routes/gmailRoute');
 
 app.use(cors());
 app.use(express.json());
 
 app.use('/api/user', userRoute);
-
-app.get('/api/test', (req, res) => {
-  res.send('hello');
-});
+app.use('/gmail', gmailRoute);
 
 app.use(notFound);
 app.use(errorHandler);

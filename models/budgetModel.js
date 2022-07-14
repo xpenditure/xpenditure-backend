@@ -20,6 +20,14 @@ const budgetSchema = mongoose.Schema(
     funds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Fund' }],
     labels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Label' }],
     expenses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Expenses' }],
+    archived: {
+      type: Boolean,
+      default: false,
+    },
+    goal: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

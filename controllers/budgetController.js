@@ -129,6 +129,46 @@ const updateBudgetLabel = (io, socket, data) => {
   );
 };
 
+const archiveBudget = (io, socket, data) => {
+  const userId = socket.decoded_token.id;
+
+  Budget.findOneAndUpdate(
+    { _id: data.budgetId, user: userId },
+    { archived: data.value },
+    (err, budget) => {
+      if (err) {
+        console.log(err);
+        ioMessage(socket, 'Error occured', 'failed');
+        return;
+      }
+
+      let msg =
+        budget.archived === true ? 'Budget unarchived' : 'Budget archived';
+
+      ioMessage(socket, msg, 'ok');
+      fetchBudgets(io, socket);
+    }
+  );
+};
+
+const budgetGoal = (io, socket, data) => {
+  const userId = socket.decoded_token.id;
+  const { budgetId, goal } = data;
+  Budget.findOneAndUpdate(
+    { _id: budgetId, user: userId },
+    { goal },
+    (err, _) => {
+      if (err) {
+        ioMessage(socket, 'Error occured', 'failed');
+        return;
+      }
+
+      ioMessage(socket, 'Goal added to budget', 'ok');
+      fetchBudgets(io, socket);
+    }
+  );
+};
+
 module.exports = {
   createBudget,
   fetchBudgets,
@@ -136,4 +176,6 @@ module.exports = {
   deleteBudget,
   fetchBudgetsByLabel,
   updateBudgetLabel,
+  archiveBudget,
+  budgetGoal,
 };
